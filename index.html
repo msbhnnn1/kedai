@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem POS & ERP - Secure Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <section id="login-section" class="login-page active">
+        <div class="login-card">
+            <h2>🔐 Login Sistem POS</h2>
+            <p style="color: #7f8c8d; margin-bottom: 20px; font-size: 14px;">Silakan masuk sesuai dengan role Anda</p>
+            
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="login-username" class="form-control" placeholder="owner / kasir / dapur">
+            </div>
+            <div class="form-group">
+                <label>Password / PIN</label>
+                <input type="password" id="login-password" class="form-control" placeholder="••••">
+            </div>
+            <button class="btn btn-accent" onclick="handleLogin()">Masuk Aplikasi</button>
+            <p id="login-error" style="color: var(--danger-color); margin-top: 10px; font-weight: 600; font-size: 14px; text-align: center;"></p>
+        </div>
+    </section>
+
+    <header id="main-header" style="display: none;">
+        <div class="logo">
+            <h1>Sistem POS & ERP (<span id="user-role-display" style="color: var(--accent-color);">Role</span>)</h1>
+        </div>
+        <div>
+            <button class="role-btn btn-danger" onclick="handleLogout()">🚪 Keluar (Logout)</button>
+        </div>
+    </header>
+
+    <main id="main-content" style="display: none;">
+        <section id="owner-section" class="dashboard-section">
+            <h2 style="margin-bottom: 20px;">Dashboard Owner</h2>
+            
+            <div class="grid-3">
+                <div class="card">
+                    <div class="card-title">Total Pendapatan</div>
+                    <div class="card-value" id="owner-revenue">Rp 0</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Total Pengeluaran Mikro</div>
+                    <div class="card-value" id="owner-expenses" style="color: var(--danger-color);">Rp 0</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Laba Bersih Toko</div>
+                    <div class="card-value" id="owner-profit" style="color: var(--success-color);">Rp 0</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Nilai Portofolio (Valuasi Stok)</div>
+                    <div class="card-value" id="owner-portfolio" style="color: purple;">Rp 0</div>
+                </div>
+            </div>
+
+            <div class="grid-pos">
+                <div>
+                    <div class="card">
+                        <div class="card-title">⚙️ Manajemen Menu Utama Toko</div>
+                        <div class="grid-3" style="grid-template-columns: 2fr 1fr 1fr 1fr; gap:10px; margin-bottom: 15px;">
+                            <input type="text" id="owner-menu-name" class="form-control" placeholder="Nama Menu Baru">
+                            <input type="number" id="owner-menu-price" class="form-control" placeholder="Harga (Rp)">
+                            <input type="number" id="owner-menu-stock" class="form-control" placeholder="Stok Awal">
+                            <button class="btn btn-success" onclick="addMenuByOwner()">+ Tambah Menu</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nama Menu</th>
+                                        <th>Harga Jual</th>
+                                        <th>Sisa Stok</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="owner-menu-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Persetujuan Pengadaan Barang (Dapur)</div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Bahan/Barang</th>
+                                        <th>Jumlah</th>
+                                        <th>Estimasi Biaya</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="owner-approval-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Riwayat Transaksi Toko & Cetak Ulang Struk</div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID / Waktu</th>
+                                        <th>Item</th>
+                                        <th>Voucher</th>
+                                        <th>Total</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="owner-sales-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="card-title">Buat Voucher / Promo</div>
+                        <div class="form-group">
+                            <label>Kode Voucher</label>
+                            <input type="text" id="vouch-code" class="form-control" placeholder="MISAL: KOPIHEMAT">
+                        </div>
+                        <div class="form-group">
+                            <label>Potongan Harga (Rp)</label>
+                            <input type="number" id="vouch-discount" class="form-control" placeholder="5000">
+                        </div>
+                        <button class="btn btn-accent" onclick="addVoucher()">Aktifkan Voucher</button>
+                        <div style="margin-top: 15px;" id="active-vouchers-list"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Input Pengeluaran Mikro Mandiri</div>
+                        <div class="form-group">
+                            <label>Keperluan</label>
+                            <input type="text" id="exp-note" class="form-control" placeholder="Misal: Beli es batu, parkir">
+                        </div>
+                        <div class="form-group">
+                            <label>Nominal (Rp)</label>
+                            <input type="number" id="exp-amount" class="form-control" placeholder="2000">
+                        </div>
+                        <button class="btn" onclick="addExpense()">Catat Pengeluaran</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="kasir-section" class="dashboard-section">
+            <h2 style="margin-bottom: 20px;">Mesin Kasir (POS)</h2>
+            <div class="grid-pos">
+                <div>
+                    <div class="card">
+                        <div class="card-title">Menu Utama Toko</div>
+                        <div class="pos-items-grid" id="pos-menu-grid"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Input Item Manual (Pesanan Khusus)</div>
+                        <div class="grid-3" style="grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:0;">
+                            <input type="text" id="manual-name" class="form-control" placeholder="Nama Menu Baru">
+                            <input type="number" id="manual-price" class="form-control" placeholder="Harga (Rp)">
+                            <button class="btn btn-accent" onclick="addManualItemToCart()">+ Keranjang</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Pantau Verifikasi Pengadaan Barang</div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Jumlah</th>
+                                        <th>Status Approval</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kasir-verification-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="card-title">Keranjang Belanja</div>
+                        <div class="cart-list" id="cart-container"></div>
+                        
+                        <div class="form-group">
+                            <label>Kode Promo / Voucher</label>
+                            <div style="display:flex; gap: 5px;">
+                                <input type="text" id="cart-voucher" class="form-control" placeholder="Masukkan kode">
+                                <button class="btn btn-sm" onclick="applyVoucher()" style="width:auto;">Pakai</button>
+                            </div>
+                            <small id="voucher-status" style="color:var(--success-color); font-weight:600;"></small>
+                        </div>
+
+                        <div style="margin: 15px 0; font-size:15px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <span>Subtotal:</span><span id="bill-subtotal">Rp 0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:var(--danger-color);">
+                                <span>Potongan Voucher:</span><span id="bill-discount">-Rp 0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-weight:700; font-size:18px; border-top:1px solid #eee; padding-top:5px;">
+                                <span>Total Akhir:</span><span id="bill-total" style="color:var(--accent-color);">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-success" style="font-size:16px; padding:12px;" onclick="checkoutOrder()">Bayar & Cetak Struk</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dapur-section" class="dashboard-section">
+            <h2 style="margin-bottom: 20px;">Sistem Monitor Dapur</h2>
+            <div class="grid-pos">
+                <div>
+                    <div class="card">
+                        <div class="card-title">Antrean Pesanan Masuk (Real-time Masak)</div>
+                        <div class="kitchen-grid" id="kitchen-orders-container"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="card-title">Ajukan Pembelian Bahan / Item Habis</div>
+                        <div class="form-group">
+                            <label>Nama Barang / Bahan Baku</label>
+                            <input type="text" id="kitchen-req-item" class="form-control" placeholder="Misal: Susu UHT, Kopi Arabika">
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Kebutuhan</label>
+                            <input type="text" id="kitchen-req-qty" class="form-control" placeholder="Misal: 5 Kotak, 2 Kg">
+                        </div>
+                        <div class="form-group">
+                            <label>Estimasi Biaya Total (Rp)</label>
+                            <input type="number" id="kitchen-req-cost" class="form-control" placeholder="150000">
+                        </div>
+                        <button class="btn btn-accent" onclick="submitKitchenRequest()">Kirim Pengajuan ke Owner</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Status Pengajuan Bahan Dapur</div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Qty</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dapur-status-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="receipt-print-zone"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
